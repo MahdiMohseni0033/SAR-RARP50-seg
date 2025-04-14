@@ -1,0 +1,21 @@
+
+path: /home/ubuntu/projects/SAM/Yolo11/yolo_dataset2
+
+# Directory names for image sets (relative to 'path')
+train: images/train
+val: images/val
+
+
+nc: 9  # Number of classes
+names: [
+  'Tool shaft',
+  'Tool clasper',
+  'Tool wrist',
+  'Thread',
+  'Clamps',
+  'Suturing needle',
+  'Suction tool',
+  'Catheter',
+  'Needle Holder'
+]
+

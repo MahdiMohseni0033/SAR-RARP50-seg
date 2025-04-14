@@ -1,0 +1,79 @@
+# Configuration for YOLOv8 Segmentation Training
+
+# --- Essential Paths & Data ---
+data: custom_segmentation.yaml # REQUIRED: Path to your dataset YAML file (see data_example.yaml)
+project: runs/segment               # Root directory for saving results
+name: medical_seg_exp_v1          # Experiment name (subfolder within project)
+
+# --- Model Configuration ---
+# Choose a pretrained segmentation model. Larger models (m, l, x) are more accurate but slower.
+# Examples: yolov8n-seg.pt, yolov8s-seg.pt, yolov8m-seg.pt, yolov8l-seg.pt, yolov8x-seg.pt
+model: yolov8x-seg.pt              # Using yolov8s-seg.pt as a starting point
+pretrained: True                  # Load pretrained weights (Implicit when using .pt, explicit here for clarity)
+
+# --- Training Parameters ---
+# start_epoch: 1                     # Start training from this epoch (useful for resuming)
+epochs: 100                       # Total number of training epochs (adjust based on convergence)
+batch: 32                      # Batch size (-1 for AutoBatch, adjust based on GPU memory)
+imgsz: 960                       # Target image size (must be multiple of 32) 640 960 1280
+patience: 30                     # Epochs to wait for no improvement before early stopping (increase if needed)
+save: True                        # Save checkpoints and final model
+save_period: 0                   # Save checkpoint every N epochs (set to -1 or 0 to save only last and best)
+seed: 42                          # Random seed for reproducibility
+resume: False                     # Resume from last checkpoint? (or path/to/last.pt)
+exist_ok: False                   # Overwrite existing experiment dir?
+
+# --- Hardware & Performance ---
+# device: '0'                     # Specify GPU ID(s) e.g., '0' or '0,1' or 'cpu'. Auto-detects if commented out/None.
+workers: 8                        # Number of dataloader workers (adjust based on CPU cores & system)
+cache: False                       # Cache images for faster loading? ('ram', 'disk', False). Use 'ram' or 'disk' if I/O is bottleneck.
+amp: True                         # Use Automatic Mixed Precision (AMP) - Faster training, less memory
+
+# --- Optimizer & Scheduler ---
+optimizer: AdamW                  # Optimizer ('SGD', 'Adam', 'AdamW', 'NAdam', 'RAdam', 'RMSProp', 'auto')
+lr0: 0.001                        # Initial learning rate (adjust based on model & dataset) - Lowered from default for fine-tuning
+lrf: 0.01                         # Final learning rate factor (final_lr = lr0 * lrf)
+momentum: 0.937                   # Momentum (for SGD) or beta1 (for Adam/AdamW)
+weight_decay: 0.0005              # Optimizer weight decay (L2 regularization)
+warmup_epochs: 5.0                # Number of warmup epochs (crucial for stable start)
+warmup_momentum: 0.8              # Initial momentum during warmup
+warmup_bias_lr: 0.1               # Initial learning rate for bias parameters during warmup
+cos_lr: True                      # Use cosine learning rate scheduler (generally recommended)
+
+# --- Loss Components (Weights) ---
+# Adjust these weights based on validation metrics. For imbalance, slightly increasing 'cls' *might* help.
+box: 7.5                          # Box loss gain (bounding box regression)
+cls: 0.5                          # Class loss gain (classification) - Consider increasing slightly (e.g., 0.6-1.0) if imbalance is severe
+dfl: 1.5                          # Distribution Focal Loss gain (used in box regression)
+
+# --- Segmentation Specific ---
+overlap_mask: True                # Allow masks to overlap during training (recommended for seg)
+mask_ratio: 4                     # Mask downsample ratio
+
+# --- Augmentation Parameters ---
+# --- !!! IMPORTANT: Tune these based on your specific medical data and validation !!! ---
+# Reference: https://docs.ultralytics.com/usage/cfg/#augmentation-settings
+hsv_h: 0.025                      # Image HSV-Hue augmentation (fraction) - Increased slightly
+hsv_s: 0.7                        # Image HSV-Saturation augmentation (fraction) - Standard
+hsv_v: 0.4                        # Image HSV-Value augmentation (fraction) - Standard
+degrees: 15.0                     # Image rotation (+/- deg) - Moderate rotation
+translate: 0.15                   # Image translation (+/- fraction) - Moderate translation
+scale: 0.6                        # Image scale (+/- gain) - Allow significant scaling (0.4x to 1.6x)
+shear: 3.0                        # Image shear (+/- deg) - Moderate shear
+perspective: 0.0003                # Image perspective (+/- fraction), range 0-0.001
+flipud: 0.5                       # Image flip up-down (probability) - Enable vertical flips
+fliplr: 0.5                       # Image flip left-right (probability) - Standard horizontal flips
+mosaic: 1.0                       # Mosaic augmentation (probability) - Keep enabled for most training
+mixup: 0.1                        # Mixup augmentation (probability) - Enable slightly, good for regularization
+copy_paste: 0.1                   # Copy-paste augmentation (probability) - Potentially very useful for rare objects
+
+# --- Augmentation Control ---
+close_mosaic: 20                  # Disable mosaic augmentation in the last N epochs (e.g., last 10-20% of epochs)
+
+# --- Logging & Visualization ---
+plots: True                       # Save training plots and images (validation predictions)
+
+# --- Advanced ---
+deterministic: False              # Force deterministic algorithms? (slower, for exact reproducibility, usually False)
+single_cls: False                 # Treat all classes as one? (Set to True only for binary segmentation)
+# freeze: None                    # Freeze layers? (e.g., 10 for first 10 layers, or [0, 1, 2] for specific indices) - Keep None for full fine-tuning initially

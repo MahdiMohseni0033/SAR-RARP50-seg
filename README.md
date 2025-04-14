@@ -101,85 +101,23 @@ rm -rf test_set
 ```
 
 
-# Hugging Face Repository Manager
+## Project Components
 
-A simple Python script to interactively manage files and view information for your Hugging Face Hub repositories (models, datasets, or spaces).
+### Huggingface Repository Manager
 
-## Features
+![HF Manager Badge](https://img.shields.io/badge/tool-repository_manager-blue)
 
-* Upload individual files to a specified repository.
-* Delete individual files from a specified repository (with confirmation prompt).
-* View repository metadata (ID, author, last modified, tags, download counts, etc.).
-* List all files currently stored within a repository.
-* Interactive, menu-driven command-line interface.
-* Supports `model`, `dataset`, and `space` repository types.
-* Flexible authentication:
-    * Enter token directly via secure prompt.
-    * Use `HF_TOKEN` environment variable.
-    * Use cached token from `huggingface-cli login`.
+A command-line utility for managing Huggingface repositories. Handles file uploads, deletions, and repository exploration.
 
-## Prerequisites
-* **Make sure the requirements in the requirements.txt file are installed.**
-* **Hugging Face Hub Account:** You need an account on [huggingface.co](https://huggingface.co/).
-* **Hugging Face User Access Token:**
-    * You need a token to authenticate with the API.
-    * Generate one from your settings: [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
-    * The token requires **`read`** permissions for viewing info and listing files.
-    * The token requires **`write`** permissions for uploading or deleting files.
+📁 **Location**: [Huggingface_repo_manager/](Huggingface_repo_manager/)
 
+✨ **Features**:
+- Upload local files to Huggingface repositories
+- Delete files with built-in safeguards
+- View repository metadata
+- Browse files with tree visualization
 
-## Usage
-
-1. un the Script:** Execute the script using Python:
-    ```bash
-    python hf_manager.py
-    ```
-2.  **Initial Configuration:** The script will prompt you for setup information:
-    * **Repository ID:** Enter the ID of the repository you want to manage (e.g., `YourUsername/YourRepoName`).
-    * **Hugging Face API Token:**
-        * You can paste your access token here. The input will be hidden for security. Press Enter when done.
-        * **Alternatively:** If you have configured the `HF_TOKEN` environment variable or logged in using `huggingface-cli login`, you can just press Enter without pasting a token. The script will attempt to use those methods.
-    * **Repository Type:** Enter the type: `model`, `dataset`, or `space`. If you press Enter without typing, it will default to `model`.
-
-3.  **Interact with the Menu:**
-    * After successful configuration, a menu will appear showing the available actions and the currently configured repository.
-    * Enter the number corresponding to your desired action (1-5) and press Enter.
-
-    ```
-    ============================================================
-     Hugging Face Manager | Repo: YourUsername/YourRepoName (model)
-    ============================================================
-    Please choose an action:
-      1. Upload a file
-      2. Delete a file
-      3. Show repository information
-      4. List repository files (tree)
-      5. Exit
-    ------------------------------------------------------------
-    Enter your choice (1-5):
-    ```
-
-4.  **Follow Prompts:** For actions like uploading or deleting, the script will ask for further details (e.g., local file path, path within the repo, commit message). Provide the requested information.
-5.  **Return to Menu:** After an action completes (or is cancelled), press Enter to go back to the main menu.
-6.  **Exit:** Choose option `5` to close the script.
-
-## Actions Explained
-
-* **1. Upload a file:**
-    * Asks for the full path to the file on your local machine.
-    * Asks for the desired path/filename within the Hugging Face repository (defaults to the original filename if left blank).
-    * Asks for a commit message (provides a default if left blank).
-* **2. Delete a file:**
-    * Asks for the exact path of the file *within* the Hugging Face repository that you want to remove.
-    * Asks for a commit message (provides a default if left blank).
-    * **Requires explicit confirmation (`yes`) before proceeding.** **Warning: Deletion is permanent and cannot be undone!**
-* **3. Show repository information:**
-    * Fetches and displays details about the configured repository, such as author, privacy status, last modification date, tags, download/like counts, and the repository URL.
-* **4. List repository files (tree):**
-    * Fetches and displays a sorted list of all files currently present in the configured repository.
-* **5. Exit:**
-    * Closes the script.
-
+For detailed usage information, see the [component README](Huggingface_repo_manager/README.md).
 
 
 
