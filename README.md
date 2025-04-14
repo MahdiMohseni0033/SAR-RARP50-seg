@@ -121,5 +121,49 @@ For detailed usage information, see the [component README](Huggingface_repo_mana
 
 
 
+## <img src="https://huggingface.co/datasets/huggingface/badges/resolve/main/hf-logo-simple.svg" width="32" height="32" align="center"/> Huggingface Repository Manager
+
+<div align="center">
+
+[![Version](https://img.shields.io/badge/version-1.0-blue)](Huggingface_repo_manager/hf_manager.py)
+[![Status](https://img.shields.io/badge/status-operational-success)](Huggingface_repo_manager/)
+[![Python](https://img.shields.io/badge/python-3.6%2B-informational)](requirements.txt)
+[![Style](https://img.shields.io/badge/code%20style-elegant-ff69b4)](Huggingface_repo_manager/hf_manager.py)
+
+</div>
+
+> 🚀 A sleek CLI utility for effortless management of Huggingface repositories, allowing seamless file operations.
+
+<table>
+<tr>
+<td width="65%">
+
+**Key Features:**
+- 📤 **Upload files** with customizable paths & commit messages
+- 🗑️ **Delete files** with built-in safeguards 
+- 📊 **View detailed repo info** including stats & metadata
+- 🔍 **Browse files** with an intuitive tree visualization
+
+</td>
+<td>
+<details>
+<summary><b>Quick Usage</b></summary>
+
+```bash
+cd Huggingface_repo_manager
+python hf_manager.py
+```
+
+</details>
+</td>
+</tr>
+</table>
+
+<div align="right">
+
+[📖 Full Documentation](Huggingface_repo_manager/README.md) | [🔗 Source Code](Huggingface_repo_manager/hf_manager.py)
+
+</div>
+
 
 
