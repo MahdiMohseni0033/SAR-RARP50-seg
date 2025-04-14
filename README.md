@@ -41,64 +41,38 @@ To set up the project, follow these steps:
     pip install -r requirements.txt
     ```
 
-# Downlaod the dataset
+## Dataset Preparation
 
-using following command to download train set:
+This project requires downloading and processing specific datasets for training and testing. We've simplified this process with a single command.
+
+### Download and prepare the training dataset
+
 ```bash
-wget -O train_set.zip "https://rdr.ucl.ac.uk/ndownloader/articles/24932529/versions/1"
-mkdir train_set && unzip train_set.zip -d train_set
-rm -rf train_set.zip 
-bash unzip_all.sh train_set
-python dataset_manager2.py \
-    --input_dir train_set \
-    --masks_dir Dataset/all_masks \
-    --frames_dir Dataset/all_frames \
-    --format png
-
-rm -rf train_set
-
-python split_data.py --image_dir Dataset/all_masks \
-                    --mask_dir Dataset/all_frames \
-                    --output_dir splited_dataset \
-                    --split_ratio 0.85
-
-rm -rf  Dataset   
-python convert_to_yolo.py \
-    --mode train_val \
-    --train-images splited_dataset/images/train \
-    --train-masks splited_dataset/labels/train \
-    --val-images splited_dataset/images/val \
-    --val-masks splited_dataset/labels/val \
-    --output-dir yolo_dataset2  
-
-          
+bash prepare_data.sh train
 ```
 
+This will:
+1. Download the training dataset
+2. Extract and process the data
+3. Split it into training and validation sets
+4. Convert to YOLO format
+5. Clean up temporary files
 
+The processed training dataset will be available in the `yolo_dataset2` directory.
 
-using following command to download test set:
+### Download and prepare the testing dataset
+
 ```bash
-wget -O test_set.zip "https://rdr.ucl.ac.uk/ndownloader/articles/24932499/versions/1"
-mkdir test_set && unzip test_set.zip -d test_set
-rm -rf test_set.zip 
-bash unzip_all.sh test_set
-
-python dataset_manager2.py \
-    --input_dir test_set \
-    --masks_dir Dataset/all_masks \
-    --frames_dir Dataset/all_frames \
-    --format png
-
-python convert_to_yolo.py \
-    --mode test \
-    --test-images Dataset/all_frames \
-    --test-masks Dataset/all_masks \
-    --output-dir yolo_test_set
-
-rm -rf test_set
-
-
+bash prepare_data.sh test
 ```
+
+This will:
+1. Download the testing dataset
+2. Extract and process the data
+3. Convert to YOLO format
+4. Clean up temporary files
+
+The processed testing dataset will be available in the `yolo_test_set` directory.
 
 
 ## Project Components
@@ -120,50 +94,6 @@ A command-line utility for managing Huggingface repositories. Handles file uploa
 For detailed usage information, see the [component README](Huggingface_repo_manager/README.md).
 
 
-
-## <img src="https://huggingface.co/datasets/huggingface/badges/resolve/main/hf-logo-simple.svg" width="32" height="32" align="center"/> Huggingface Repository Manager
-
-<div align="center">
-
-[![Version](https://img.shields.io/badge/version-1.0-blue)](Huggingface_repo_manager/hf_manager.py)
-[![Status](https://img.shields.io/badge/status-operational-success)](Huggingface_repo_manager/)
-[![Python](https://img.shields.io/badge/python-3.6%2B-informational)](requirements.txt)
-[![Style](https://img.shields.io/badge/code%20style-elegant-ff69b4)](Huggingface_repo_manager/hf_manager.py)
-
-</div>
-
-> 🚀 A sleek CLI utility for effortless management of Huggingface repositories, allowing seamless file operations.
-
-<table>
-<tr>
-<td width="65%">
-
-**Key Features:**
-- 📤 **Upload files** with customizable paths & commit messages
-- 🗑️ **Delete files** with built-in safeguards 
-- 📊 **View detailed repo info** including stats & metadata
-- 🔍 **Browse files** with an intuitive tree visualization
-
-</td>
-<td>
-<details>
-<summary><b>Quick Usage</b></summary>
-
-```bash
-cd Huggingface_repo_manager
-python hf_manager.py
-```
-
-</details>
-</td>
-</tr>
-</table>
-
-<div align="right">
-
-[📖 Full Documentation](Huggingface_repo_manager/README.md) | [🔗 Source Code](Huggingface_repo_manager/hf_manager.py)
-
-</div>
 
 
 
