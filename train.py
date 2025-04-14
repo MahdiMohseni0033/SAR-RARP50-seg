@@ -1,6 +1,3 @@
-# train.py
-# Main script to train the YOLOv8 segmentation model using YAML configuration.
-
 import os
 import argparse
 import yaml

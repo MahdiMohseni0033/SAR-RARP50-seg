@@ -98,3 +98,101 @@ A sophisticated command-line utility designed for seamless management of Hugging
 </table>
 
 For detailed usage information, see the [component README](Huggingface_repo_manager/README.md).
+
+
+# YOLOv8 Segmentation Evaluator
+
+`yolov8_seg_evaluator.py` provides comprehensive evaluation of YOLOv8 segmentation models on test datasets. The tool calculates key metrics including IoU, Dice coefficient, pixel accuracy, and mAP while handling class imbalance.
+
+## Features
+
+- Processes YOLO format test data (images + text labels)
+- Calculates per-class and weighted metrics
+- Generates visualization plots (PR curves, confusion matrix, etc.)
+- Exports results as CSV files for further analysis
+- Handles unbalanced class distributions
+
+## Usage
+
+```bash
+python yolov8_seg_evaluator.py --model path/to/model.pt --img-dir path/to/images --label-dir path/to/labels
+```
+
+### Arguments
+
+- `--model`: Path to your YOLOv8 model file
+- `--img-dir`: Directory containing test images
+- `--label-dir`: Directory containing YOLO format label files
+- `--num-classes`: Number of segmentation classes (default: 9)
+- `--save-dir`: Directory to save evaluation results (default: 'evaluation_results')
+
+## Output
+
+The tool generates metrics CSV files and visualization plots in the specified output directory.
+
+
+
+# YOLOv8 Segmentation Video Inference
+
+`yolo_video_inference.py` processes videos using a trained YOLOv8 segmentation model, overlaying colored masks for each detected class and adding a visual legend.
+
+## Features
+
+- Processes video files with YOLOv8 segmentation models
+- Overlays semi-transparent colored masks for each detected object
+- Displays a color-coded legend showing all 9 surgical tool classes
+- Shows real-time processing statistics (FPS, frame count)
+- Optimized for surgical tool segmentation with distinct colors for easy identification
+
+## Usage
+
+```bash
+python yolo_video_inference.py --model path/to/model.pt --video path/to/input.mp4 --output path/to/output.mp4
+```
+
+### Arguments
+
+- `--model`: Path to your YOLOv8 segmentation model
+- `--video`: Path to input video file
+- `--output`: Path for output video (default: 'output_video.mp4')
+- `--conf`: Confidence threshold for detections (default: 0.3)
+
+## Output
+
+The script generates a video with colored segmentation masks and a class legend in the corner.
+
+# YOLOv8 Segmentation Image Processor
+
+`yolo_image_inference.py` processes images using a trained YOLOv8 segmentation model, overlaying colored masks and creating a visual color legend for easy class identification.
+
+## Features
+
+- Processes single images or entire directories
+- Overlays semi-transparent colored masks for each detected object
+- Displays a comprehensive color-coded legend for all 9 surgical tool classes
+- Adds contour outlines for better boundary visualization
+- Supports multiple image formats (JPG, PNG, BMP)
+
+## Usage
+
+For a single image:
+```bash
+python yolo_image_inference.py --model path/to/model.pt --image path/to/image.jpg --output path/to/output.jpg
+```
+
+For a directory of images:
+```bash
+python yolo_image_inference.py --model path/to/model.pt --dir path/to/images --output path/to/output_dir
+```
+
+### Arguments
+
+- `--model`: Path to your YOLOv8 segmentation model
+- `--image`: Path to input image (use this OR --dir)
+- `--dir`: Path to directory containing images (use this OR --image)
+- `--output`: Path for output image or directory (optional)
+- `--conf`: Confidence threshold for detections (default: 0.3)
+
+## Output
+
+The script generates images with colored segmentation masks and a legend in the top corner, making it easy to identify different surgical tools.

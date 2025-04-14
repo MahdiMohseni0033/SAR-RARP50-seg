@@ -52,7 +52,7 @@ if [ "$MODE" = "train" ]; then
         --image_dir Dataset/all_masks \
         --mask_dir Dataset/all_frames \
         --output_dir splited_dataset \
-        --split_ratio 0.85
+        --split_ratio 0.80
 
     rm -rf Dataset
 
