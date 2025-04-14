@@ -129,3 +129,4 @@ ENV/
 /out
 *.map
 *.bundle
+ command_runner.sh
