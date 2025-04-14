@@ -1,99 +1,100 @@
-# SAR-RARP50-seg
+# 🔬 SAR-RARP50-seg
 
-## Method
+<div align="center">
 
-This project utilizes the YOLOv8 segmentation model (specifically, the `xlarge` variant) for semantic segmentation tasks, likely involving the SAR-RARP50 dataset.
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Python](https://img.shields.io/badge/python-3.11-brightgreen)
+![YOLOv8](https://img.shields.io/badge/model-YOLOv8--xlarge-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Installation
+**Advanced Semantic Segmentation for Robotic Surgery Imagery**
+</div>
 
-To set up the project, follow these steps:
+<p align="center">
+  <img src="https://img.shields.io/badge/%F0%9F%A4%96%20Powered%20by-YOLOv8-yellow" alt="Powered by YOLOv8">
+</p>
 
-1.  **Clone the repository:**
+## 📋 Overview
 
-    You can clone the repository using either HTTPS (recommended) or SSH:
+This project leverages the cutting-edge YOLOv8 segmentation model (specifically the `xlarge` variant) for high-precision semantic segmentation tasks on the SAR-RARP50 dataset, enabling accurate identification and delineation of surgical instruments and anatomical structures.
 
-    * **HTTPS:**
-        ```bash
-        git clone [https://github.com/MahdiMohseni0033/SAR-RARP50-seg.git](https://github.com/MahdiMohseni0033/SAR-RARP50-seg.git)
-        ```
-    * **SSH:**
-        ```bash
-        git clone git@github.com:MahdiMohseni0033/SAR-RARP50-seg.git
-        ```
+## ⚙️ Installation
 
-2.  **Navigate into the project directory:**
-    ```bash
-    cd SAR-RARP50-seg
-    ```
-
-3.  **Create and activate a Conda environment:**
-
-    This project requires Python 3.11. Create a dedicated environment using Conda:
-    ```bash
-    conda create -n yolo-sar python=3.11 -y
-    conda activate yolo-sar
-    ```
-
-4.  **Install the required dependencies:**
-
-    Install all necessary packages listed in the `requirements.txt` file:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-## Dataset Preparation
-
-This project requires downloading and processing specific datasets for training and testing. We've simplified this process with a single command.
-
-### Download and prepare the training dataset
+<details>
+<summary><b>📥 Setup Instructions</b></summary>
 
 ```bash
-bash prepare_data.sh train
+# Step 1: Clone the repository
+git clone https://github.com/MahdiMohseni0033/SAR-RARP50-seg.git
+
+# Step 2: Navigate to project directory
+cd SAR-RARP50-seg
+
+# Step 3: Create and activate Conda environment
+conda create -n yolo-sar python=3.11 -y
+conda activate yolo-sar
+
+# Step 4: Install dependencies
+pip install -r requirements.txt
 ```
 
-This will:
-1. Download the training dataset
-2. Extract and process the data
-3. Split it into training and validation sets
-4. Convert to YOLO format
-5. Clean up temporary files
+</details>
 
-The processed training dataset will be available in the `yolo_dataset2` directory.
+## 🗃️ Dataset Preparation
 
-### Download and prepare the testing dataset
+<table>
+  <tr>
+    <th width="50%">Training Dataset</th>
+    <th width="50%">Testing Dataset</th>
+  </tr>
+  <tr>
+    <td>
+      <pre><code>bash prepare_data.sh train</code></pre>
+      <ul>
+        <li>Downloads the training dataset</li>
+        <li>Processes and splits into training/validation sets</li>
+        <li>Converts to YOLO format</li>
+        <li>Stores in <code>yolo_dataset2</code> directory</li>
+      </ul>
+    </td>
+    <td>
+      <pre><code>bash prepare_data.sh test</code></pre>
+      <ul>
+        <li>Downloads the testing dataset</li>
+        <li>Processes the data</li>
+        <li>Converts to YOLO format</li>
+        <li>Stores in <code>yolo_test_set</code> directory</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
-```bash
-bash prepare_data.sh test
-```
+## 🧩 Project Components
 
-This will:
-1. Download the testing dataset
-2. Extract and process the data
-3. Convert to YOLO format
-4. Clean up temporary files
+### 🔄 Huggingface Repository Manager
 
-The processed testing dataset will be available in the `yolo_test_set` directory.
-
-
-## Project Components
-
-### Huggingface Repository Manager
-
+<div align="center">
+  
 ![HF Manager Badge](https://img.shields.io/badge/tool-repository_manager-blue)
+  
+</div>
 
-A command-line utility for managing Huggingface repositories. Handles file uploads, deletions, and repository exploration.
+A sophisticated command-line utility designed for seamless management of Huggingface repositories.
 
 📁 **Location**: [Huggingface_repo_manager/](Huggingface_repo_manager/)
 
-✨ **Features**:
-- Upload local files to Huggingface repositories
-- Delete files with built-in safeguards
-- View repository metadata
-- Browse files with tree visualization
+<table>
+  <tr>
+    <th colspan="2">✨ Key Features</th>
+  </tr>
+  <tr>
+    <td width="50%">• Upload local files to Huggingface</td>
+    <td width="50%">• Delete files with built-in safeguards</td>
+  </tr>
+  <tr>
+    <td width="50%">• View repository metadata</td>
+    <td width="50%">• Browse files with tree visualization</td>
+  </tr>
+</table>
 
 For detailed usage information, see the [component README](Huggingface_repo_manager/README.md).
-
-
-
-
-
