@@ -3,3 +3,4 @@ ultralytics
 opencv-python
 simple_parsing
 huggingface_hub
+streamlit

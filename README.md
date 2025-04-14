@@ -196,3 +196,44 @@ python yolo_image_inference.py --model path/to/model.pt --dir path/to/images --o
 ## Output
 
 The script generates images with colored segmentation masks and a legend in the top corner, making it easy to identify different surgical tools.
+
+
+# Surgical Tool Segmentation Streamlit App
+
+`surgical_tool_segmentation_app.py` provides an elegant web interface for segmenting surgical tools in images and videos using YOLOv8 models.
+
+## Features
+
+- Beautiful, responsive UI with custom styling
+- Support for both image and video processing
+- Real-time visualization with color-coded masks and legends
+- Interactive controls for model selection and confidence thresholds
+- Progress tracking for video processing with time estimates
+- Downloadable results for both images and videos
+- Comprehensive metrics display (processing time, detected classes, FPS)
+
+## Usage
+
+1. Install requirements:
+   ```bash
+   pip install streamlit opencv-python numpy ultralytics pillow
+   ```
+
+2. Run the app:
+   ```bash
+   streamlit run surgical_tool_segmentation_app.py
+   ```
+
+3. Upload your YOLOv8 model (.pt file) in the sidebar
+4. Select processing mode (image or video)
+5. Upload your file and adjust confidence threshold if needed
+6. View and download the segmentation results
+
+## Supported Classes
+
+The app is optimized for surgical tool segmentation with support for 9 classes:
+- Tool shaft, Tool clasper, Tool wrist
+- Thread, Clamps, Suturing needle
+- Suction tool, Catheter, Needle Holder
+
+The interface automatically generates distinct colors for each class and displays them in a legend overlay.
