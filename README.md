@@ -119,9 +119,7 @@ A simple Python script to interactively manage files and view information for yo
     * Use cached token from `huggingface-cli login`.
 
 ## Prerequisites
-
-* **Python:** Version 3.6 or higher recommended.
-* **pip:** Python package installer (usually comes with Python).
+* **Make sure the requirements in the requirements.txt file are installed.**
 * **Hugging Face Hub Account:** You need an account on [huggingface.co](https://huggingface.co/).
 * **Hugging Face User Access Token:**
     * You need a token to authenticate with the API.
@@ -129,37 +127,21 @@ A simple Python script to interactively manage files and view information for yo
     * The token requires **`read`** permissions for viewing info and listing files.
     * The token requires **`write`** permissions for uploading or deleting files.
 
-## Installation
-
-1.  **Download the Script:**
-    Save the Python script code provided previously as `hf_manager.py` in a convenient directory on your computer.
-
-2.  **Install Dependencies:**
-    Open your terminal or command prompt, navigate (`cd`) to the directory where you saved `hf_manager.py`, and install the required `huggingface_hub` library:
-    ```bash
-    pip install huggingface_hub
-    ```
-    *(If you encounter permission issues, you might need `pip install --user huggingface_hub`)*
 
 ## Usage
 
-1.  **Open Terminal:** Launch your terminal or command prompt.
-2.  **Navigate to Script Directory:** Use the `cd` command to go to the folder where you saved `hf_manager.py`.
-    ```bash
-    cd path/to/your/script/directory
-    ```
-3.  **Run the Script:** Execute the script using Python:
+1. un the Script:** Execute the script using Python:
     ```bash
     python hf_manager.py
     ```
-4.  **Initial Configuration:** The script will prompt you for setup information:
+2.  **Initial Configuration:** The script will prompt you for setup information:
     * **Repository ID:** Enter the ID of the repository you want to manage (e.g., `YourUsername/YourRepoName`).
     * **Hugging Face API Token:**
         * You can paste your access token here. The input will be hidden for security. Press Enter when done.
         * **Alternatively:** If you have configured the `HF_TOKEN` environment variable or logged in using `huggingface-cli login`, you can just press Enter without pasting a token. The script will attempt to use those methods.
     * **Repository Type:** Enter the type: `model`, `dataset`, or `space`. If you press Enter without typing, it will default to `model`.
 
-5.  **Interact with the Menu:**
+3.  **Interact with the Menu:**
     * After successful configuration, a menu will appear showing the available actions and the currently configured repository.
     * Enter the number corresponding to your desired action (1-5) and press Enter.
 
@@ -177,9 +159,9 @@ A simple Python script to interactively manage files and view information for yo
     Enter your choice (1-5):
     ```
 
-6.  **Follow Prompts:** For actions like uploading or deleting, the script will ask for further details (e.g., local file path, path within the repo, commit message). Provide the requested information.
-7.  **Return to Menu:** After an action completes (or is cancelled), press Enter to go back to the main menu.
-8.  **Exit:** Choose option `5` to close the script.
+4.  **Follow Prompts:** For actions like uploading or deleting, the script will ask for further details (e.g., local file path, path within the repo, commit message). Provide the requested information.
+5.  **Return to Menu:** After an action completes (or is cancelled), press Enter to go back to the main menu.
+6.  **Exit:** Choose option `5` to close the script.
 
 ## Actions Explained
 
@@ -198,19 +180,7 @@ A simple Python script to interactively manage files and view information for yo
 * **5. Exit:**
     * Closes the script.
 
-## Error Handling
 
-The script includes basic checks and error handling for common scenarios like:
-* File not found (local uploads, remote deletions).
-* Repository not found.
-* Authentication issues (invalid token, insufficient permissions).
-* Network connection problems.
-
-Error messages will be displayed in the terminal, usually starting with "Error:".
-
----
-
-Feel free to modify or extend this script for your specific needs.
 
 
 
