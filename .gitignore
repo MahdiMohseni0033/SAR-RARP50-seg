@@ -1,0 +1,131 @@
+# ===============================
+# General / OS
+# ===============================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon\r
+*~\r
+*.swp
+*.swo
+.cache
+.AppleDouble
+
+# ===============================
+# Logs and temp files
+# ===============================
+*.log
+*.tmp
+temp/
+tmp/
+out/
+build/
+dist/
+__pycache__/
+*.pyc
+*$py.class
+.Rhistory
+.RData
+
+# ===============================
+# IDE specific
+# ===============================
+.idea/
+.vscode/
+*.suo
+*.user
+*.proj.user
+*.sln.docstates
+*.tds
+*.bak
+*.orig
+*.ln
+*.la
+*.lo
+*.o
+*.obj
+*.pch
+*.pdb
+*.aps
+ipch/
+obj/
+Bin/
+[Bb]in/
+*.[Pp]db
+*.ilk
+*.resources
+*.cache
+/out
+/build
+dist/
+
+# ===============================
+# Package managers
+# ===============================
+node_modules/
+/bower_components
+jspm_packages/
+/vendor/
+/deps
+/Pods
+
+# ===============================
+# Sensitive files
+# ===============================
+*.env
+.env*
+secrets.txt
+credentials.txt
+id_rsa
+id_dsa
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ===============================
+# Editor backups
+# ===============================
+*.[Ee]xp
+*.~
+*.backup
+*.prev
+*.asv
+*.vi
+*.cache
+
+# ===============================
+# Java
+# ===============================
+*.class
+*.jar
+*.war
+*.ear
+target/
+/classes
+/test-classes
+.settings/
+/out
+
+# ===============================
+# Python
+# ===============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.mypy_cache/
+env/
+venv/
+ENV/
+/env
+
+# ===============================
+# Web
+# ===============================
+/node_modules
+/dist
+/build
+/out
+*.map
+*.bundle
