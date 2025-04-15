@@ -7,7 +7,7 @@
 
 ## Overview
 
-This project leverages the YOLOv8 segmentation model (xlarge variant) for high-precision semantic segmentation tasks on the SAR-RARP50 dataset. It enables accurate identification and delineation of surgical instruments and anatomical structures in robotic surgery imagery.
+This project implements YOLOv8 segmentation (xlarge variant) for high-precision semantic segmentation on the SAR-RARP50 dataset. It enables accurate identification and delineation of surgical instruments and anatomical structures in robotic surgery imagery.
 
 ## Installation
 
@@ -29,28 +29,51 @@ pip install -r requirements.txt
 ## Dataset Preparation
 
 ### Training Dataset
+
 ```bash
 bash prepare_data.sh train
 ```
+
+This script:
 - Downloads the training dataset
 - Processes and splits into training/validation sets
 - Converts to YOLO format
 - Stores in `yolo_dataset2` directory
 
 ### Testing Dataset
+
 ```bash
 bash prepare_data.sh test
 ```
+
+This script:
 - Downloads the testing dataset
 - Processes the data
 - Converts to YOLO format
 - Stores in `yolo_test_set` directory
 
-## Project Components
+## Training
+
+To train the model, configure the hyperparameters in `config.yaml` and run:
+
+```bash
+python train.py --config config.yaml
+```
+
+## Pre-trained Model
+
+Download our pre-trained checkpoint from Huggingface:
+
+```bash
+git lfs install
+git clone https://huggingface.co/Mahdimohseni0333/SAR-RARP50
+```
+
+## Components
 
 ### Huggingface Repository Manager
 
-A command-line utility designed for seamless management of Huggingface repositories.
+A command-line utility for seamless management of Huggingface repositories.
 
 **Location**: [Huggingface_repo_manager/](Huggingface_repo_manager/)
 
@@ -59,7 +82,7 @@ A command-line utility designed for seamless management of Huggingface repositor
 - Delete files with built-in safeguards
 - View repository metadata
 - Browse files with tree visualization
-
+![Huggingface_repo_manager_app](assets/HF-manager.png)
 For detailed usage information, see the [component README](Huggingface_repo_manager/README.md).
 
 ### YOLOv8 Segmentation Evaluator
@@ -75,18 +98,21 @@ For detailed usage information, see the [component README](Huggingface_repo_mana
 
 **Usage**:
 ```bash
-python scripts/yolov8_seg_evaluator.py --model path/to/model.pt --img-dir path/to/images --label-dir path/to/labels
+python scripts/yolov8_seg_evaluator.py --model path/to/model.pt \
+                                      --img-dir path/to/images \
+                                      --label-dir path/to/labels
 ```
 
 **Arguments**:
-- `--model`: Path to your YOLOv8 model file
-- `--img-dir`: Directory containing test images
-- `--label-dir`: Directory containing YOLO format label files
-- `--num-classes`: Number of segmentation classes (default: 9)
-- `--save-dir`: Directory to save evaluation results (default: 'evaluation_results')
+| Argument | Description |
+|----------|-------------|
+| `--model` | Path to your YOLOv8 model file |
+| `--img-dir` | Directory containing test images |
+| `--label-dir` | Directory containing YOLO format label files |
+| `--num-classes` | Number of segmentation classes (default: 9) |
+| `--save-dir` | Directory to save evaluation results (default: 'evaluation_results') |
 
-**Output**:
-The tool generates metrics CSV files and visualization plots in the specified output directory.
+**Output**: The tool generates metrics CSV files and visualization plots in the specified output directory.
 
 ### YOLOv8 Segmentation Video Inference
 
@@ -101,17 +127,20 @@ The tool generates metrics CSV files and visualization plots in the specified ou
 
 **Usage**:
 ```bash
-python scripts/yolo_video_inference.py --model path/to/model.pt --video path/to/input.mp4 --output path/to/output.mp4
+python scripts/yolo_video_inference.py --model path/to/model.pt \
+                                      --video path/to/input.mp4 \
+                                      --output path/to/output.mp4
 ```
 
 **Arguments**:
-- `--model`: Path to your YOLOv8 segmentation model
-- `--video`: Path to input video file
-- `--output`: Path for output video (default: 'output_video.mp4')
-- `--conf`: Confidence threshold for detections (default: 0.3)
+| Argument | Description |
+|----------|-------------|
+| `--model` | Path to your YOLOv8 segmentation model |
+| `--video` | Path to input video file |
+| `--output` | Path for output video (default: 'output_video.mp4') |
+| `--conf` | Confidence threshold for detections (default: 0.3) |
 
-**Output**:
-The script generates a video with colored segmentation masks and a class legend in the corner.
+**Output**: The script generates a video with colored segmentation masks and a class legend in the corner.
 
 Example: [Watch Sample Output Video](assets/output.mp4)
 
@@ -130,49 +159,52 @@ Example: [Watch Sample Output Video](assets/output.mp4)
 
 For a single image:
 ```bash
-python scripts/yolo_image_inference.py --model path/to/model.pt --image path/to/image.jpg --output path/to/output.jpg
+python scripts/yolo_image_inference.py --model path/to/model.pt \
+                                      --image path/to/image.jpg \
+                                      --output path/to/output.jpg
 ```
 
 For a directory of images:
 ```bash
-python scripts/yolo_image_inference.py --model path/to/model.pt --dir path/to/images --output path/to/output_dir
+python scripts/yolo_image_inference.py --model path/to/model.pt \
+                                      --dir path/to/images \
+                                      --output path/to/output_dir
 ```
 
 **Arguments**:
-- `--model`: Path to your YOLOv8 segmentation model
-- `--image`: Path to input image (use this OR --dir)
-- `--dir`: Path to directory containing images (use this OR --image)
-- `--output`: Path for output image or directory (optional)
-- `--conf`: Confidence threshold for detections (default: 0.3)
+| Argument | Description |
+|----------|-------------|
+| `--model` | Path to your YOLOv8 segmentation model |
+| `--image` | Path to input image (use this OR --dir) |
+| `--dir` | Path to directory containing images (use this OR --image) |
+| `--output` | Path for output image or directory (optional) |
+| `--conf` | Confidence threshold for detections (default: 0.3) |
 
-**Output**:
-The script generates images with colored segmentation masks and a legend in the top corner.
+**Output**: The script generates images with colored segmentation masks and a legend in the top corner.
 
 ### Streamlit UI
 
-**Installation**:
-```bash
-git lfs install
-git clone https://huggingface.co/Mahdimohseni0333/SAR-RARP50
-```
+Launch the interactive web interface:
 
-**Running the app**:
 ```bash
 streamlit run streamlit_app.py
 ```
 
-In this UI, you can set the path of the model and upload your image or video for inference.
+In this UI, you can set the model path and upload your image or video for inference.
 
 ![Streamlit App Interface](assets/image_streamlit.png)
 
-### Evaluation Code
+### Evaluation Command
+
+Run the evaluation script with:
 
 ```bash
 python scripts/yolov8_seg_evaluator.py --model_path <path_of_model> \
-                               --image_dir <path_of_img_folder> \
-                               --label_dir <path_of_labels_folder> \
-                               --output_dir <path_of_foler_result> 
+                                      --image_dir <path_of_img_folder> \
+                                      --label_dir <path_of_labels_folder> \
+                                      --output_dir <path_of_folder_result> 
 ```
 
 An example image demonstrating the segmentation results during evaluation:
+
 ![Evaluation Sample](assets/evaluation_sample.png)
