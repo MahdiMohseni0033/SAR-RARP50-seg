@@ -75,7 +75,7 @@ For detailed usage information, see the [component README](Huggingface_repo_mana
 
 **Usage**:
 ```bash
-python yolov8_seg_evaluator.py --model path/to/model.pt --img-dir path/to/images --label-dir path/to/labels
+python scripts/yolov8_seg_evaluator.py --model path/to/model.pt --img-dir path/to/images --label-dir path/to/labels
 ```
 
 **Arguments**:
@@ -101,7 +101,7 @@ The tool generates metrics CSV files and visualization plots in the specified ou
 
 **Usage**:
 ```bash
-python yolo_video_inference.py --model path/to/model.pt --video path/to/input.mp4 --output path/to/output.mp4
+python scripts/yolo_video_inference.py --model path/to/model.pt --video path/to/input.mp4 --output path/to/output.mp4
 ```
 
 **Arguments**:
@@ -130,12 +130,12 @@ Example: [Watch Sample Output Video](assets/output.mp4)
 
 For a single image:
 ```bash
-python yolo_image_inference.py --model path/to/model.pt --image path/to/image.jpg --output path/to/output.jpg
+python scripts/yolo_image_inference.py --model path/to/model.pt --image path/to/image.jpg --output path/to/output.jpg
 ```
 
 For a directory of images:
 ```bash
-python yolo_image_inference.py --model path/to/model.pt --dir path/to/images --output path/to/output_dir
+python scripts/yolo_image_inference.py --model path/to/model.pt --dir path/to/images --output path/to/output_dir
 ```
 
 **Arguments**:
@@ -168,7 +168,7 @@ In this UI, you can set the path of the model and upload your image or video for
 ### Evaluation Code
 
 ```bash
-python yolov8_seg_evaluator.py --model_path <path_of_model> \
+python scripts/yolov8_seg_evaluator.py --model_path <path_of_model> \
                                --image_dir <path_of_img_folder> \
                                --label_dir <path_of_labels_folder> \
                                --output_dir <path_of_foler_result> 
