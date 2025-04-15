@@ -105,7 +105,7 @@ target/
 /classes
 /test-classes
 .settings/
-/out
+/outf
 
 # ===============================
 # Python
