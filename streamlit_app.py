@@ -1,491 +1,400 @@
 import streamlit as st
 import cv2
 import numpy as np
-import tempfile
-import os
-import time
-from pathlib import Path
+import torch
 from ultralytics import YOLO
+from pathlib import Path
+import time
 from PIL import Image
 import io
 import base64
-from datetime import datetime
+import logging
 
-# Set page configuration
+torch.classes.__path__ = []
+# Configure page
 st.set_page_config(
-    page_title="Surgical Tool Segmentation",
-    page_icon="🔬",
+    page_title="AI Segmentation App",
+    page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for styling
+# Custom CSS to make the app more visually appealing
 st.markdown("""
 <style>
-    .main-header {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #1E88E5;
-        text-align: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #f0f0f0;
-    }
-    .sub-header {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #333;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-    }
-    .result-text {
-        font-size: 1.2rem;
-        font-weight: 500;
-        color: #2E7D32;
-    }
-    .info-box {
-        background-color: #E3F2FD;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .metric-container {
+    .main {
         background-color: #f8f9fa;
+    }
+    .stButton button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 10px;
+        padding: 10px 24px;
+        font-weight: bold;
+        border: none;
+        transition-duration: 0.4s;
+    }
+    .stButton button:hover {
+        background-color: #45a049;
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+    }
+    .stSlider > div > div > div {
+        background-color: #4CAF50;
+    }
+    .title-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         padding: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-radius: 10px;
+        background: linear-gradient(90deg, #4CAF50 0%, #2E8B57 100%);
+        color: white;
+        margin-bottom: 2rem;
+    }
+    .result-container {
+        padding: 1.5rem;
+        border-radius: 10px;
+        background-color: white;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        margin-top: 1rem;
+    }
+    .sidebar-content {
+        padding: 1rem;
+        background-color: #f1f1f1;
+        border-radius: 10px;
         margin-bottom: 1rem;
-    }
-    .footer {
-        text-align: center;
-        margin-top: 3rem;
-        padding-top: 1rem;
-        border-top: 1px solid #f0f0f0;
-        color: #666;
-        font-size: 0.8rem;
-    }
-    .stProgress > div > div > div > div {
-        background-color: #1E88E5;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Default model path
-DEFAULT_MODEL_PATH = "models/yolov8_segmentation.pt"  # Change this to your default model path
-
-# Class names and colors
-CLASS_NAMES = [
-    'Tool shaft',
-    'Tool clasper',
-    'Tool wrist',
-    'Thread',
-    'Clamps',
-    'Suturing needle',
-    'Suction tool',
-    'Catheter',
-    'Needle Holder'
-]
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
-# Generate distinct colors for each class using HSV color space
-@st.cache_data
-def generate_colors(num_classes):
-    colors = []
-    for i in range(num_classes):
-        # Use HSV color space for better distinctness
-        hue = int(i * 255 / num_classes)
-        # Full saturation and value for vibrant colors
-        hsv_color = np.array([[[hue, 255, 255]]], dtype=np.uint8)
-        # Convert to BGR for OpenCV
-        bgr_color = cv2.cvtColor(hsv_color, cv2.COLOR_HSV2BGR)[0][0]
-        # Convert to RGB format
-        colors.append((int(bgr_color[2]), int(bgr_color[1]), int(bgr_color[0])))
-    return colors
+def main():
+    # App title
+    st.markdown('<div class="title-container"><h1>🔍 AI Segmentation Studio</h1></div>', unsafe_allow_html=True)
+
+    # Sidebar configuration
+    with st.sidebar:
+        st.markdown('<div class="sidebar-content">', unsafe_allow_html=True)
+        st.subheader("Model Configuration")
+        model_path = st.text_input("Model Path", "runs/segment/train/weights/best.pt",
+                                   help="Path to your YOLO segmentation model file (.pt)")
+
+        conf_threshold = st.slider("Confidence Threshold", 0.1, 1.0, 0.5, 0.05,
+                                   help="Minimum confidence score for detections")
+        iou_threshold = st.slider("IoU Threshold", 0.1, 1.0, 0.7, 0.05,
+                                  help="Intersection over Union threshold for NMS")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="sidebar-content">', unsafe_allow_html=True)
+        st.subheader("Visualization Settings")
+        overlay_opacity = st.slider("Mask Opacity", 0.1, 1.0, 0.5, 0.05,
+                                    help="Opacity of the segmentation mask overlay")
+
+        display_legend = st.checkbox("Display Color Legend", True,
+                                     help="Show class color legend on the output")
+
+        output_quality = st.slider("Output Quality", 50, 100, 90, 5,
+                                   help="Quality of the output image")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Process image
+    process_image(model_path, conf_threshold, iou_threshold, overlay_opacity, display_legend, output_quality)
 
 
-def draw_legend(image, class_names, colors):
-    """Draw a legend with class names and their corresponding colors."""
-    # Configuration
-    start_x = 20
-    start_y = 30
-    box_size = 15
-    text_offset = 5
-    line_spacing = 5
-    text_scale = 0.5
-    text_thickness = 1
-    font = cv2.FONT_HERSHEY_SIMPLEX
+def colorize_mask(mask: np.ndarray, num_classes: int = 9) -> tuple:
+    """Colorizes a single-channel mask image and returns color palette."""
+    if num_classes <= 10:
+        palette = [
+            (0, 0, 0), (255, 0, 0), (0, 255, 0), (0, 0, 255),
+            (255, 255, 0), (255, 0, 255), (0, 255, 255),
+            (128, 0, 0), (0, 128, 0), (0, 0, 128),
+        ]
+    elif num_classes <= 20:
+        palette = [
+            (0, 0, 0), (255, 0, 0), (0, 255, 0), (0, 0, 255),
+            (255, 255, 0), (255, 0, 255), (0, 255, 255),
+            (128, 0, 0), (0, 128, 0), (0, 0, 128),
+            (255, 128, 0), (128, 255, 0), (0, 255, 128),
+            (0, 128, 255), (128, 0, 255), (255, 0, 128),
+            (64, 64, 64), (192, 192, 192), (220, 220, 220), (105, 105, 105)
+        ]
+    else:
+        # Generate random colors but ensure they're visually distinct
+        np.random.seed(42)  # For reproducible colors
+        palette = [(0, 0, 0)]  # Background is black
 
-    # Get the width of the longest class name
-    max_width = 0
-    for name in class_names:
-        (text_width, _), _ = cv2.getTextSize(name, font, text_scale, text_thickness)
-        max_width = max(max_width, text_width)
+        # Generate initial colors
+        for i in range(num_classes - 1):
+            color = (np.random.randint(50, 256), np.random.randint(50, 256), np.random.randint(50, 256))
+            palette.append(color)
 
-    # Calculate background dimensions
-    legend_height = len(class_names) * (box_size + line_spacing) + line_spacing
-    legend_width = start_x + box_size + text_offset + max_width + 20
+    palette = palette[:num_classes]
+    colorized_mask = np.zeros((mask.shape[0], mask.shape[1], 3), dtype=np.uint8)
+    unique_mask_values = np.unique(mask)
 
-    # Create semi-transparent background
+    for i in unique_mask_values:
+        if i < num_classes:
+            colorized_mask[mask == i] = palette[i]
+        else:
+            logger.warning(
+                f"Mask contains class index {i} which is out of bounds for the palette size {num_classes}. Assigning black.")
+            colorized_mask[mask == i] = (0, 0, 0)
+
+    return colorized_mask, palette
+
+
+def overlay_mask(image: np.ndarray, colorized_mask: np.ndarray, alpha: float = 0.5) -> np.ndarray:
+    """Overlays a colorized mask on the original image."""
+    if image.shape[:2] != colorized_mask.shape[:2]:
+        logger.warning(
+            f"Image shape {image.shape[:2]} and colorized mask shape {colorized_mask.shape[:2]} differ. Resizing mask.")
+        colorized_mask = cv2.resize(colorized_mask, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_NEAREST)
+
+    foreground_mask = np.any(colorized_mask != [0, 0, 0], axis=-1)
+    blended_image = image.copy()
+    blended_image[foreground_mask] = cv2.addWeighted(
+        image.astype(float)[foreground_mask], 1 - alpha,
+        colorized_mask.astype(float)[foreground_mask], alpha,
+        0
+    ).astype(np.uint8)
+
+    return blended_image
+
+
+def add_color_legend(image, palette, class_names, unique_class_ids):
+    """Adds a color legend to the upper right corner of the image."""
+    # Define the size and position of the box
+    box_width = 180
+    box_height = 30 * min(len(unique_class_ids), 10)  # Limit legend height
+    if box_height < 30:  # Ensure minimum height
+        box_height = 30
+
+    margin = 10
+
+    # Create a white box in the upper right corner
+    x1 = image.shape[1] - box_width - margin
+    y1 = margin
+    x2 = image.shape[1] - margin
+    y2 = y1 + box_height
+
+    # Draw white box with slight transparency
     overlay = image.copy()
-    cv2.rectangle(overlay, (0, 0), (legend_width, legend_height), (0, 0, 0), -1)
-    cv2.addWeighted(overlay, 0.7, image, 0.3, 0, image, 0)
+    cv2.rectangle(overlay, (x1, y1), (x2, y2), (255, 255, 255), -1)
+    cv2.rectangle(overlay, (x1, y1), (x2, y2), (0, 0, 0), 1)  # Black border
 
-    # Draw class boxes and names
-    for i, name in enumerate(class_names):
-        y = start_y + i * (box_size + line_spacing)
+    # Add the color legend with transparency
+    alpha = 0.8
+    image = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
 
-        # Draw color box
-        cv2.rectangle(image, (start_x, y - box_size), (start_x + box_size, y), colors[i], -1)
-        cv2.rectangle(image, (start_x, y - box_size), (start_x + box_size, y), (0, 0, 0), 1)
+    # Add color swatches and class names
+    count = 0
+    for i, class_id in enumerate(unique_class_ids):
+        if class_id == 0 or count >= 10:  # Skip background class and limit to 10 classes
+            continue
 
-        # Draw class name
-        cv2.putText(image, name, (start_x + box_size + text_offset, y - 2),
-                    font, text_scale, (255, 255, 255), text_thickness)
+        # Draw color square
+        color = palette[class_id]
+        y_pos = y1 + 15 + (count * 30)
+        cv2.rectangle(image, (x1 + 10, y_pos - 10), (x1 + 30, y_pos + 10), color, -1)
+        cv2.rectangle(image, (x1 + 10, y_pos - 10), (x1 + 30, y_pos + 10), (0, 0, 0), 1)  # Black border
+
+        # Add class name
+        class_name = class_names.get(class_id - 1, f"Class {class_id}")
+        cv2.putText(image, class_name, (x1 + 40, y_pos + 5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+        count += 1
 
     return image
 
 
-def process_image(model, image, conf_threshold=0.3):
-    """Process image with YOLOv8 segmentation model and overlay masks."""
-    # Generate colors for classes
-    colors = generate_colors(len(CLASS_NAMES))
+def process_frame(model, frame, conf_thres, iou_thres, overlay_alpha, display_legend, num_classes, class_names):
+    """Process a single image frame and return the overlayed result."""
+    try:
+        results = model.predict(frame, conf=conf_thres, iou=iou_thres, verbose=False)
+        if not results or results[0].masks is None:
+            logger.warning("Model prediction did not return masks for this frame. Returning original frame.")
+            return frame
 
-    # Convert PIL Image to cv2 image
-    image_cv = np.array(image)
-    # Convert RGB to BGR (OpenCV format)
-    image_cv = cv2.cvtColor(image_cv, cv2.COLOR_RGB2BGR)
+        result = results[0]
+        if result.boxes is None or len(result.boxes) == 0:
+            logger.warning("No bounding boxes found for this frame. Returning original frame.")
+            return frame
 
-    height, width = image_cv.shape[:2]
+        if result.masks is None or len(result.masks) == 0:
+            logger.warning("No masks found for this frame. Returning original frame.")
+            return frame
 
-    # Run inference
-    results = model.predict(image_cv, conf=conf_threshold, verbose=False)[0]
+        confidences = result.boxes.conf.cpu().numpy()
+        conf_mask = confidences >= conf_thres
+        if not np.any(conf_mask):
+            logger.warning(f"No detections above confidence threshold {conf_thres}. Returning original frame.")
+            return frame
 
-    # Create a copy for drawing
-    overlay_image = image_cv.copy()
+        masks_cpu = result.masks.data.cpu().numpy()
+        filtered_masks = masks_cpu[conf_mask]
+        class_ids_cpu = result.boxes.cls.cpu().numpy().astype(int)
+        filtered_class_ids = class_ids_cpu[conf_mask]
 
-    # Initialize a set to track detected classes
-    detected_classes = set()
+        if filtered_masks.shape[0] == 0:
+            logger.warning("No masks remained after confidence filtering. Returning original frame.")
+            return frame
 
-    # Process masks
-    if hasattr(results, 'masks') and results.masks is not None:
-        masks = results.masks.data.cpu().numpy()
-        boxes = results.boxes.data.cpu().numpy()
+        orig_h, orig_w = frame.shape[:2]
+        combined_mask = np.zeros((orig_h, orig_w), dtype=np.uint8)
 
-        for i, mask in enumerate(masks):
-            # Get class ID
-            class_id = int(boxes[i][5])
-            detected_classes.add(class_id)
+        for i, mask_instance in enumerate(filtered_masks):
+            class_id = filtered_class_ids[i] + 1
+            mask_instance_resized = cv2.resize(mask_instance, (orig_w, orig_h),
+                                               interpolation=cv2.INTER_NEAREST) if mask_instance.shape != (
+                orig_h, orig_w) else mask_instance
+            binary_mask = (mask_instance_resized > 0.5).astype(np.uint8)
+            combined_mask = np.maximum(combined_mask, binary_mask * class_id)
 
-            # Ensure class_id is within our range
-            if class_id < len(colors):
-                # Create binary mask
-                mask = mask.reshape(height, width)
-                binary_mask = (mask > 0.5).astype(np.uint8)
+        colorized_mask, palette = colorize_mask(combined_mask, num_classes=num_classes + 1)
+        colorized_mask_resized = cv2.resize(colorized_mask, (orig_w, orig_h),
+                                            interpolation=cv2.INTER_NEAREST) if colorized_mask.shape[:2] != (
+            orig_h, orig_w) else colorized_mask
 
-                # Create colored mask
-                colored_mask = np.zeros((height, width, 3), dtype=np.uint8)
-                colored_mask[binary_mask == 1] = colors[class_id]
+        overlayed_frame = overlay_mask(frame, colorized_mask_resized, alpha=overlay_alpha)
 
-                # Blend with original image
-                alpha = 0.5  # Transparency factor
-                mask_area = (binary_mask == 1)
-                overlay_image[mask_area] = cv2.addWeighted(
-                    overlay_image[mask_area],
-                    1 - alpha,
-                    colored_mask[mask_area],
-                    alpha,
-                    0
-                )
+        if display_legend:
+            # Get unique class IDs excluding background (0)
+            unique_class_ids = np.unique(combined_mask)
+            unique_class_ids = unique_class_ids[unique_class_ids > 0]  # Exclude background
 
-                # Add contour for better visibility
-                contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                cv2.drawContours(overlay_image, contours, -1, colors[class_id], 2)
+            # Add color legend to overlayed frame
+            final_frame = add_color_legend(overlayed_frame, palette, class_names, unique_class_ids)
+        else:
+            final_frame = overlayed_frame
 
-    # Add legend
-    overlay_image = draw_legend(overlay_image, CLASS_NAMES, colors)
+        return final_frame
 
-    # Convert back to RGB for displaying in Streamlit
-    result_image = cv2.cvtColor(overlay_image, cv2.COLOR_BGR2RGB)
-
-    return result_image, detected_classes
-
-
-def process_video_frame(frame, model, colors, conf_threshold=0.3):
-    """Process a single video frame."""
-    height, width = frame.shape[:2]
-
-    # Run inference
-    results = model.predict(frame, conf=conf_threshold, verbose=False)[0]
-
-    # Create a copy for drawing
-    overlay_frame = frame.copy()
-
-    # Process each detected segment
-    if hasattr(results, 'masks') and results.masks is not None:
-        masks = results.masks.data.cpu().numpy()
-        boxes = results.boxes.data.cpu().numpy()
-
-        for i, mask in enumerate(masks):
-            # Get class ID
-            class_id = int(boxes[i][5])
-
-            # Ensure the class_id is within our range
-            if class_id < len(colors):
-                # Create binary mask
-                mask = mask.reshape(height, width)
-                binary_mask = (mask > 0.5).astype(np.uint8)
-
-                # Create colored mask
-                colored_mask = np.zeros((height, width, 3), dtype=np.uint8)
-                colored_mask[binary_mask == 1] = colors[class_id]
-
-                # Blend with original frame
-                alpha = 0.5  # Transparency factor
-                mask_area = (binary_mask == 1)
-                overlay_frame[mask_area] = cv2.addWeighted(
-                    overlay_frame[mask_area],
-                    1 - alpha,
-                    colored_mask[mask_area],
-                    alpha,
-                    0
-                )
-
-                # Add contour for better visibility
-                contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                cv2.drawContours(overlay_frame, contours, -1, colors[class_id], 2)
-
-    # Add legend
-    overlay_frame = draw_legend(overlay_frame, CLASS_NAMES, colors)
-
-    return overlay_frame
+    except Exception as e:
+        logger.error(f"Error processing frame: {e}", exc_info=True)
+        return frame
 
 
-def get_download_link(file_path, file_name):
-    """Generate a download link for a file."""
-    with open(file_path, "rb") as f:
-        data = f.read()
-    b64 = base64.b64encode(data).decode()
-    href = f'<a href="data:file/download;base64,{b64}" download="{file_name}">Download {file_name}</a>'
+def load_model(model_path):
+    """Load the YOLO model with error handling."""
+    progress_text = "Loading model..."
+    progress_bar = st.progress(0)
+
+    try:
+        model_path = Path(model_path)
+
+        if not model_path.is_file():
+            script_dir = Path.cwd()
+            potential_path = script_dir / model_path
+            if potential_path.is_file():
+                model_path = potential_path
+                logger.info(f"Resolved model path to: {model_path}")
+            else:
+                st.error(f"⚠️ Model not found at: {model_path} or {potential_path}")
+                st.stop()
+
+        progress_bar.progress(25)
+
+        # Load the model
+        model = YOLO(model_path)
+
+        progress_bar.progress(75)
+
+        # Get class names from model
+        class_names = {}
+        if hasattr(model, 'names'):
+            num_classes = len(model.names)
+            class_names = model.names
+            logger.info(f"Model has {num_classes} classes: {model.names}")
+        else:
+            st.error("⚠️ Could not determine number of classes from model.")
+            st.stop()
+
+        progress_bar.progress(100)
+        time.sleep(0.5)  # Show completed progress briefly
+        progress_bar.empty()
+
+        return model, num_classes, class_names
+
+    except Exception as e:
+        progress_bar.empty()
+        st.error(f"⚠️ Error loading model: {str(e)}")
+        st.stop()
+
+
+def get_download_link(img, filename, text, quality=90):
+    """Generate a download link for an image."""
+    img_pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    buffered = io.BytesIO()
+    img_pil.save(buffered, format="JPEG", quality=quality)
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    href = f'<a href="data:file/jpg;base64,{img_str}" download="{filename}">{text}</a>'
     return href
 
 
-# Sidebar content
-st.sidebar.markdown("<h1 style='text-align: center;'>Settings</h1>", unsafe_allow_html=True)
+def process_image(model_path, conf_threshold, iou_threshold, overlay_opacity, display_legend, output_quality):
+    """Process and segment an image."""
+    # File uploader for images
+    uploaded_file = st.file_uploader("Upload an image", type=['jpg', 'jpeg', 'png', 'bmp'])
 
-# Confidence threshold
-conf_threshold = st.sidebar.slider(
-    "Confidence Threshold",
-    min_value=0.1,
-    max_value=1.0,
-    value=0.3,
-    step=0.05,
-    help="Minimum confidence score for detection"
-)
+    if uploaded_file is not None:
+        # Create columns for before/after
+        col1, col2 = st.columns(2)
 
-# Inference mode
-inference_mode = st.sidebar.radio(
-    "Inference Mode",
-    options=["Image", "Video"],
-    help="Select whether to process an image or video"
-)
+        # Display the original image
+        file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+        image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
-# Main content
-st.markdown("<h1 class='main-header'>Surgical Tool Segmentation</h1>", unsafe_allow_html=True)
+        with col1:
+            st.markdown('<div class="result-container">', unsafe_allow_html=True)
+            st.subheader("Original Image")
+            st.image(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), use_column_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
-# Display information about the application
-with st.expander("ℹ️ About this app", expanded=False):
-    st.markdown("""
-    <div class='info-box'>
-        <p>This application uses a YOLOv8 segmentation model to detect and segment surgical tools in images and videos.</p>
-        <p>The model can detect the following 9 classes of surgical tools:</p>
-        <ul>
-            <li>Tool shaft</li>
-            <li>Tool clasper</li>
-            <li>Tool wrist</li>
-            <li>Thread</li>
-            <li>Clamps</li>
-            <li>Suturing needle</li>
-            <li>Suction tool</li>
-            <li>Catheter</li>
-            <li>Needle Holder</li>
-        </ul>
-        <p>To get started, select your inference mode (Image or Video) in the sidebar, then upload a file for processing.</p>
-    </div>
-    """, unsafe_allow_html=True)
+        # Load model
+        model, num_classes, class_names = load_model(model_path)
 
-# Try to load the model from the default path
-try:
-    # Load the model
-    with st.spinner("Loading YOLOv8 model..."):
-        model = YOLO(DEFAULT_MODEL_PATH)
-        st.sidebar.success("✅ Model loaded successfully!")
-
-    # Generate colors for classes
-    colors = generate_colors(len(CLASS_NAMES))
-
-    # Image inference
-    if inference_mode == "Image":
-        st.markdown("<h2 class='sub-header'>Image Segmentation</h2>", unsafe_allow_html=True)
-
-        # Upload image
-        uploaded_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
-
-        if uploaded_image is not None:
-            # Read image
-            image = Image.open(uploaded_image)
-
-            # Create columns for before/after display
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.markdown("<p style='text-align: center;'>Original Image</p>", unsafe_allow_html=True)
-                st.image(image, use_column_width=True)
-
-            # Process image
-            with st.spinner("Processing image..."):
-                start_time = time.time()
-                result_image, detected_classes = process_image(model, image, conf_threshold)
-                processing_time = time.time() - start_time
-
-            with col2:
-                st.markdown("<p style='text-align: center;'>Segmented Image</p>", unsafe_allow_html=True)
-                st.image(result_image, use_column_width=True)
-
-            # Show metrics
-            st.markdown("<div class='metric-container'>", unsafe_allow_html=True)
-            metric_col1, metric_col2, metric_col3 = st.columns(3)
-
-            with metric_col1:
-                st.metric("Processing Time", f"{processing_time:.3f} seconds")
-
-            with metric_col2:
-                detected_classes_list = [CLASS_NAMES[i] for i in detected_classes]
-                st.metric("Detected Classes", len(detected_classes))
-
-            with metric_col3:
-                st.metric("Confidence Threshold", f"{conf_threshold:.2f}")
-
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            # Display detected classes
-            if detected_classes:
-                st.markdown("<p class='result-text'>Detected Surgical Tools:</p>", unsafe_allow_html=True)
-                detected_classes_str = ", ".join([CLASS_NAMES[i] for i in detected_classes])
-                st.info(detected_classes_str)
-            else:
-                st.warning("No surgical tools detected in the image.")
-
-            # Save result
-            result_pil = Image.fromarray(result_image)
-            output_buffer = io.BytesIO()
-            result_pil.save(output_buffer, format="PNG")
-
-            # Download button
-            st.download_button(
-                label="Download Segmented Image",
-                data=output_buffer.getvalue(),
-                file_name=f"segmented_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png",
-                mime="image/png",
+        # Process the image
+        with st.spinner("Processing image..."):
+            processed_image = process_frame(
+                model, image, conf_threshold, iou_threshold,
+                overlay_opacity, display_legend, num_classes, class_names
             )
 
-    # Video inference
+        # Display the processed image
+        with col2:
+            st.markdown('<div class="result-container">', unsafe_allow_html=True)
+            st.subheader("Segmented Image")
+            st.image(cv2.cvtColor(processed_image, cv2.COLOR_BGR2RGB), use_column_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        # Download option
+        st.markdown('<div class="result-container">', unsafe_allow_html=True)
+        st.markdown("### Download Results")
+        download_link = get_download_link(
+            processed_image, "segmented_image.jpg",
+            "📥 Download Segmented Image", output_quality
+        )
+        st.markdown(download_link, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Add instructions
     else:
-        st.markdown("<h2 class='sub-header'>Video Segmentation</h2>", unsafe_allow_html=True)
+        st.markdown('<div class="result-container">', unsafe_allow_html=True)
+        st.markdown("""
+        ### 📋 Instructions
+        1. Upload an image (JPG, PNG, or BMP format)
+        2. Adjust the confidence and IoU thresholds as needed
+        3. Customize the visualization settings
+        4. After processing, you can download the segmented image
 
-        # Upload video
-        uploaded_video = st.file_uploader("Upload a video", type=["mp4", "avi", "mov"])
+        **Note:** Processing time depends on the image size and complexity.
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        if uploaded_video is not None:
-            # Save the uploaded video to a temporary file
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video:
-                tmp_video.write(uploaded_video.getvalue())
-                video_path = tmp_video.name
 
-            # Display the original video
-            st.markdown("<p style='text-align: center;'>Original Video</p>", unsafe_allow_html=True)
-            st.video(uploaded_video)
-
-            # Process video button
-            if st.button("Process Video"):
-                # Get video properties
-                cap = cv2.VideoCapture(video_path)
-                width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                fps = cap.get(cv2.CAP_PROP_FPS)
-                frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-                # Create a temporary file for the output video
-                output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4').name
-
-                # Create video writer
-                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-                out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
-
-                # Create a progress bar
-                progress_bar = st.progress(0)
-                status_text = st.empty()
-
-                # Process frames
-                frame_idx = 0
-                start_time = time.time()
-
-                while True:
-                    ret, frame = cap.read()
-                    if not ret:
-                        break
-
-                    # Process frame
-                    processed_frame = process_video_frame(frame, model, colors, conf_threshold)
-
-                    # Write frame to output video
-                    out.write(processed_frame)
-
-                    # Update progress
-                    frame_idx += 1
-                    progress = frame_idx / frame_count
-                    progress_bar.progress(progress)
-                    status_text.text(
-                        f"Processing: {frame_idx}/{frame_count} frames ({progress * 100:.1f}%) - ETA: {((time.time() - start_time) / frame_idx) * (frame_count - frame_idx):.1f}s")
-
-                # Release resources
-                cap.release()
-                out.release()
-
-                # Processing time
-                processing_time = time.time() - start_time
-
-                # Display results
-                st.markdown("<p style='text-align: center;'>Processed Video</p>", unsafe_allow_html=True)
-                st.video(output_path)
-
-                # Show metrics
-                st.markdown("<div class='metric-container'>", unsafe_allow_html=True)
-                metric_col1, metric_col2, metric_col3 = st.columns(3)
-
-                with metric_col1:
-                    st.metric("Processing Time", f"{processing_time:.2f} seconds")
-
-                with metric_col2:
-                    st.metric("Processed Frames", frame_idx)
-
-                with metric_col3:
-                    st.metric("Average FPS", f"{frame_idx / processing_time:.2f}")
-
-                st.markdown("</div>", unsafe_allow_html=True)
-
-                # Download link
-                output_filename = f"segmented_video_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
-                st.markdown(get_download_link(output_path, output_filename), unsafe_allow_html=True)
-
-except Exception as e:
-    st.error(f"Error loading or using the model: {e}")
-    st.info(f"Please make sure the model exists at: {DEFAULT_MODEL_PATH}")
-    st.info("The app expects a YOLOv8 segmentation model trained on surgical tool data.")
-
-# Footer
-st.markdown("""
-<div class='footer'>
-    <p>YOLOv8 Surgical Tool Segmentation App</p>
-    <p>Powered by Ultralytics and Streamlit</p>
-</div>
-""", unsafe_allow_html=True)
+if __name__ == "__main__":
+    main()
