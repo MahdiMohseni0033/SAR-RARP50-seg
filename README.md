@@ -115,11 +115,6 @@ The script generates a video with colored segmentation masks and a class legend 
 
 Example: [Watch Sample Output Video](assets/output.mp4)
 
-<video width="640" height="360" controls>
-  <source src="assets/output.mp4" type="video/mp4">
-  Your browser does not support the video tag. You can [download the video here](assets/output.mp4).
-</video>
-
 ### YOLOv8 Segmentation Image Processor
 
 `yolo_image_inference.py` processes images using a trained YOLOv8 segmentation model, overlaying colored masks and creating a visual color legend for easy class identification.
