@@ -87,14 +87,8 @@ For detailed usage information, see the [component README](Huggingface_repo_mana
 
 ### YOLOv8 Segmentation Evaluator
 
-`yolov8_seg_evaluator.py` provides comprehensive evaluation of YOLOv8 segmentation models on test datasets. The tool calculates key metrics including IoU, Dice coefficient, pixel accuracy, and mAP while handling class imbalance.
+`yolov8_seg_evaluator.py` provides comprehensive evaluation of YOLOv8 segmentation models on test datasets. The tool calculates key metrics including IoU, Dice coefficient, pixel accuracy, and mAP.
 
-**Features**:
-- Processes YOLO format test data (images + text labels)
-- Calculates per-class and weighted metrics
-- Generates visualization plots (PR curves, confusion matrix, etc.)
-- Exports results as CSV files for further analysis
-- Handles unbalanced class distributions
 
 **Usage**:
 ```bash
